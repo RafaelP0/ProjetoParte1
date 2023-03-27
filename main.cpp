@@ -6,13 +6,14 @@
 #include <limits>
 
 using namespace std;
-const int MAX = 80;
+const int MAX = 100;
 
 class TGrafo {
 private:
   int n;     // quantidade de vértices
   int m;     // quantidade de arestas
   float **adj; // matriz de adjacência
+  const char **ruas;
 public:
   TGrafo(int n);
   void insereA(int v, int w, float a);
@@ -20,7 +21,7 @@ public:
   void show();
   void gravar();
   void ler();
-  void inserirV();
+  void inserirV(const char *rr);
   void removeV(int v);
   ~TGrafo();
 };
@@ -28,6 +29,14 @@ public:
 TGrafo::TGrafo(int n) {
   this->n = n;
   this->m = 0;
+  const char **name = new const char *[4];
+  ruas = name;
+
+  ruas[0]="Rua 0";
+  ruas[1]="Rua 1";
+  ruas[2]="Rua 2";
+  ruas[3]="Rua 3";
+  
 
   float **adjac = new float *[n];
   for (int i = 0; i < n; i++)
@@ -36,6 +45,8 @@ TGrafo::TGrafo(int n) {
   for (int i = 0; i < n; i++)
     for (int j = 0; j < n; j++)
       adj[i][j] = numeric_limits<float>::infinity();
+
+  
 }
 
 TGrafo::~TGrafo() {
@@ -64,6 +75,7 @@ void TGrafo::removeA(int v, int w) {
 
 void TGrafo::show() {
   cout << "n: " << n << endl;
+  
   cout << "m: " << m << endl;
   for (int i = 0; i < n; i++) {
     cout << "\n";
@@ -72,7 +84,7 @@ void TGrafo::show() {
          cout << "(" << i << "," << w << ") = " << adj[i][w]<< " ";
 
   }
-  cout << "ou alternativamente \n";
+  cout << "\nou alternativamente \n";
   cout << "n: " << n << endl;
   cout << "m: " << m << endl;
   for (int i = 0; i < n; i++) {
@@ -91,8 +103,10 @@ void TGrafo::show() {
 void TGrafo::gravar() {
   ofstream fout("grafo.txt");
   fout << n << endl;
-  for (int i = 0; i < n; i++) 
-    fout << i << endl;
+  for (int i = 0; i < n; i++) {
+    fout << i <<" ";
+    fout <<ruas[i] << endl;
+    }
   fout << m << endl;
   for (int i = 0; i < n; i++) {
     for (int w = 0; w < n; w++)
@@ -111,9 +125,24 @@ void TGrafo::ler() {
 }
 }
 
-void TGrafo::inserirV(){
+void TGrafo::inserirV(const char *rr){
   n+=1;
-  
+
+  const char **names = new const char*[n];
+
+  for (int i = 0; i < n; i++){
+    
+    if(i==(n-1))
+      names[i]=ruas[n];
+    else{
+      names[i] =rr;
+    }
+    }
+
+
+  ruas = names;
+
+
   float **adjac = new float *[n];
   for (int i = 0; i <= n; i++)
     adjac[i] = new float[n];
@@ -134,6 +163,7 @@ void TGrafo::inserirV(){
   }
 
 void TGrafo::removeV(int v){
+
   n-=1;
   
   float **adjac = new float *[n];
@@ -164,23 +194,27 @@ void TGrafo::removeV(int v){
     for (int j = 0; j < n; j++) 
         adj[i][j] = adjac[i][j];
 
-    
+
 }
 
+char buffer[MAX];
 int main() {
+   
   TGrafo g(4);
-
   g.insereA(0, 1, 01);
   g.insereA(0, 2, 02);
   g.insereA(2, 1, 21);
   g.insereA(2, 3, 23);
   g.insereA(1, 3, 13);
+  g.insereA(3, 1, 31);
 
-  
 
 char b;
 int v1, v2;
 float a;
+string r1;
+const char* input_cstr;
+
 while (b != 'i'){
   cout << "\nEscolha uma opção: \n"<< 
     " a) Ler dados do arquivo grafo.txt\n b) Gravar dados no arquivo grafo.txt\n c) Inserir vértice\n d) Inserir aresta;\n e) Remove vértice;\n f) Remove aresta;\n g) Mostrar conteúdo do arquivo;\n h) Mostrar grafo;\n i) Encerrar a aplicação.\n\n" << endl;
@@ -188,20 +222,21 @@ while (b != 'i'){
   switch(b) {
 
   case 'a':
-    cout << "A" << endl;
-    g.gravar();
+    g.ler();
     break;
-
     
   case 'b':
-    cout << "B" << endl;
-    g.ler();
+    g.gravar();
     // code block
     break;
 
-    
   case 'c':
-    g.inserirV();
+    cout<<"\nInsira o nome da rua: ";
+    getline(cin, r1);
+    cin.ignore();
+    input_cstr = r1.c_str();
+    g.inserirV(input_cstr);
+    
     break;
 
   case 'd':
@@ -214,26 +249,27 @@ while (b != 'i'){
       g.insereA(v1, v2, a);
       break;
 
-    case 'e':
-      cout<<"\nInsira o vertice que gostaria de apagar: ";
-      cin >> v1;
-      g.removeV(v1);
-      break;
-    case 'f':
-      cout<<"\nInsira o primeiro vertice: ";
-      cin >> v1;
-      cout<<"\nInsira o segunto vertice: ";
-      cin >> v2;
-
-      g.removeA(v1, v2);
-      break;
+  case 'e':
+    cout<<"\nInsira o vertice que gostaria de apagar: ";
+    cin >> v1;
+    g.removeV(v1);
+    break;
     
+  case 'f':
+    cout<<"\nInsira o primeiro vertice: ";
+    cin >> v1;
+    cout<<"\nInsira o segunto vertice: ";
+    cin >> v2;
+
+    g.removeA(v1, v2);
+    break;
+      
     case 'h':
       g.show();
     break;
     
-  case 'i':
-    cout<<"bye bye!!"<< endl;
+    case 'i':
+      cout<<"bye bye!!"<< endl;
     break;
     
   default:
